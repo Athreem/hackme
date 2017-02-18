@@ -25,7 +25,8 @@ function autoSuicide.OnUpdate()
 		local suicide_range = 800
 		local unitsEnemyAround = NPC.GetUnitsInRadius(myHero, suicide_range, Enum.TeamType.TEAM_ENEMY)
 		local heroEnemyAround = NPC.GetHeroesInRadius(myHero, 1400, Enum.TeamType.TEAM_ENEMY)
-		if heroEnemyAround == nil then return end
+		if #heroEnemyAround == 0 then return end
+		Log.Write(#heroEnemyAround)
 		if unitsEnemyAround == nil then return end
 		local self_damage = Ability.GetLevelSpecialValueFor(suicide_skill, "self_damage")
 		if Ability.IsCastable(suicide_skill, myMana) then
