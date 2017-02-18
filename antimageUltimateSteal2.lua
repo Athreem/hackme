@@ -14,7 +14,7 @@ function antimageUlt.OnDraw()
 	
 	local skillManaVoid = NPC.GetAbilityByIndex(myHero, 3)
 	local rangeManaVoid = 600--Ability.GetLevelSpecialValueFor(skillManaVoid, "mana_void_aoe_radius")
-	local rangeTargetManaVoid = Ability.GetLevelSpecialValueFor(skillManaVoid, "mana_void_aoe_radius")
+	local rangeTargetManaVoid = Ability.GetLevelSpecialValueFor(skillManaVoid, "mana_void_aoe_radius") - 25
 	local damageManaVoid = Ability.GetLevelSpecialValueFor(skillManaVoid, "mana_void_damage_per_mana")
 	
 	local unitsAround = NPC.GetHeroesInRadius(myHero, rangeManaVoid, Enum.TeamType.TEAM_ENEMY)
