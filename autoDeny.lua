@@ -26,19 +26,22 @@ function autoSuicide.OnUpdate()
 		local unitsEnemyAround = NPC.GetUnitsInRadius(myHero, suicide_range, Enum.TeamType.TEAM_ENEMY)
 		local heroEnemyAround = NPC.GetHeroesInRadius(myHero, 1400, Enum.TeamType.TEAM_ENEMY)
 		if #heroEnemyAround == 0 then return end
-		Log.Write(#heroEnemyAround)
 		if unitsEnemyAround == nil then return end
 		local self_damage = Ability.GetLevelSpecialValueFor(suicide_skill, "self_damage")
 		if Ability.IsCastable(suicide_skill, myMana) then
 			for key,value in ipairs(NPC.GetModifiers(myHero)) do
-				if Modifier.GetName(value) ~= "modifier_abaddon_aphotic_shield" or Modifier.GetName(value) ~= "modifier_abaddon_borrowed_time" then
-					for number, enemy in ipairs(unitsEnemyAround) do
-						if not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and suicide == false then
-							if myHp <= self_damage then
-								Ability.CastTarget(suicide_skill, enemy, true)
-								suicide = true
-							end
-						end
+				if Modifier.GetName(value) == "modifier_abaddon_aphotic_shield" or Modifier.GetName(value) == "modifier_abaddon_borrowed_time" then 
+					suicide = true
+					break
+				else
+					suicide = false
+				end
+			end
+			for number, enemy in ipairs(unitsEnemyAround) do
+				if not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and suicide == false then
+					if myHp <= self_damage then
+						Ability.CastTarget(suicide_skill, enemy, true)
+						suicide = true
 					end
 				end
 			end
