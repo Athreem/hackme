@@ -1,7 +1,11 @@
 local autoSuicide = {}
 
 autoSuicide.optionEnabled = Menu.AddOption({"Utility","Auto Suicide"},"Enable", "on/off")
-autoSuicide.optionEnabledSR = Menu.AddOption({"Utility","Auto Suicide"},"Use Soul Ring?", "on/off")
+autoSuicide.optionEnabledSR = Menu.AddOption({"Utility","Auto Suicide"},"Use Soul Ring?", "Only Pudge")
+
+local suicide = false
+
+local delay 
 
 function autoSuicide.OnUpdate()
 	if not Menu.IsEnabled(autoSuicide.optionEnabled) then return end
@@ -9,7 +13,10 @@ function autoSuicide.OnUpdate()
 	if myHero == nil then return end
 	local myMana = NPC.GetMana(myHero)
 	local myHp = Entity.GetHealth(myHero)
-	if myHp <= 0 then return end
+	if myHp <= 0 then 
+		suicide = false
+		return 
+	end
 	
 	if NPC.GetUnitName(myHero) == "npc_dota_hero_abaddon" then
 		local suicide_skill = NPC.GetAbilityByIndex(myHero, 0)
@@ -21,14 +28,15 @@ function autoSuicide.OnUpdate()
 		if heroEnemyAround == nil then return end
 		if unitsEnemyAround == nil then return end
 		local self_damage = Ability.GetLevelSpecialValueFor(suicide_skill, "self_damage")
-		local suicide = false
-		if Ability.IsCastable(suicide_skill, myMana) and myHp <= self_damage then
+		if Ability.IsCastable(suicide_skill, myMana) then
 			for key,value in ipairs(NPC.GetModifiers(myHero)) do
 				if Modifier.GetName(value) ~= "modifier_abaddon_aphotic_shield" or Modifier.GetName(value) ~= "modifier_abaddon_borrowed_time" then
 					for number, enemy in ipairs(unitsEnemyAround) do
 						if not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and suicide == false then
-							Ability.CastTarget(suicide_skill, enemy, true)
-							suicide = true
+							if myHp <= self_damage then
+								Ability.CastTarget(suicide_skill, enemy, true)
+								suicide = true
+							end
 						end
 					end
 				end
@@ -43,13 +51,14 @@ function autoSuicide.OnUpdate()
 		if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then return end
 		if Menu.IsEnabled(autoSuicide.optionEnabledSR) and soul_ring ~= nil then
 			if Ability.IsCastable(soul_ring, myMana) then
-				if myHp <= self_damage + 149 then
+				if myHp <= self_damage / 3 + 149 then
 					Ability.CastNoTarget(soul_ring, true)
 				end
 			end
 		end
-		if myHp <= self_damage then
-			Ability.CastNoTarget(suicide_skill, true)
+		if myHp <= self_damage and suicide == false then
+			Ability.Toggle(suicide_skill, true)
+			suicide = true
 		end
 	end
 end
