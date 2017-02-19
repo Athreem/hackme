@@ -177,8 +177,11 @@ function courierReuse.OnUpdate()
 						for k, v in pairs(courierReuse.items) do
 							if NPC.HasItem(index_npc, k, false) then
 								local item = NPC.GetItem(index_npc, k, true)
-								if Item.GetPlayerOwnerID(item) == 0 then
+								--Log.Write(Item.GetPlayerOwnerID(item) .. "   " .. Hero.GetPlayerID(myHero))
+								if Item.GetPlayerOwnerID(item) == Hero.GetPlayerID(myHero) then
 									bReuse = true
+								else 
+									bReuse = false
 								end
 							end
 						end
