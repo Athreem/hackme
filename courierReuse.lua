@@ -2,6 +2,7 @@ local courierReuse = {}
 
 courierReuse.OptionEnabled = Menu.AddOption({"Utility", "Courier"}, "Enabled","on/off")
 courierReuse.optionKey = Menu.AddKeyOption({ "Utility","Courier"}, "Key to reuse", Enum.ButtonCode.KEY_T)
+courierReuse.optionNoFeed = Menu.AddOption({"Utility", "Courier"}, "Anti Feed","on/off")
 
 courierReuse.items = {}
 courierReuse.items["item_aegis"] = "Aegis of the Immortal"
@@ -160,7 +161,7 @@ courierReuse.items["item_yasha"] = "Yasha"
 
 function courierReuse.OnUpdate()
 	if not Menu.IsEnabled(courierReuse.OptionEnabled) then return end
-	if Menu.IsKeyDown(courierReuse.optionKey) then
+	
 		local myHero = Heroes.GetLocal()
 		if myHero == nil then return end
 		local myTeam =  Entity.GetTeamNum(myHero)
@@ -174,27 +175,32 @@ function courierReuse.OnUpdate()
 					if name == "npc_dota_courier" then
 						local reuse = NPC.GetAbilityByIndex(index_npc, 4)
 						local reuse_2 = NPC.GetAbilityByIndex(index_npc, 3)
-						for k, v in pairs(courierReuse.items) do
-							if NPC.HasItem(index_npc, k, false) then
-								local item = NPC.GetItem(index_npc, k, true)
-								--Log.Write(Item.GetPlayerOwnerID(item) .. "   " .. Hero.GetPlayerID(myHero))
-								if Item.GetPlayerOwnerID(item) == Hero.GetPlayerID(myHero) then
-									bReuse = true
-								else 
-									bReuse = false
+						local go_home = NPC.GetAbilityByIndex(index_npc, 0)
+						if Menu.IsKeyDown(courierReuse.optionKey) then
+							for k, v in pairs(courierReuse.items) do
+								if NPC.HasItem(index_npc, k, false) then
+									local item = NPC.GetItem(index_npc, k, true)
+									Log.Write(Item.GetPlayerOwnerID(item) .. "   " .. Hero.GetPlayerID(myHero))
+									if Item.GetPlayerOwnerID(item) == Hero.GetPlayerID(myHero) then
+										bReuse = true
+									else 
+										bReuse = false
+									end
 								end
 							end
+							if bReuse == true then
+								Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_NO_TARGET, myHero, Vector(0,0,0), reuse, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, index_npc)
+							else
+								Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_NO_TARGET, myHero, Vector(0,0,0), reuse_2, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, index_npc)
+							end
 						end
-						if bReuse == true then
-							Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_NO_TARGET, myHero, Vector(0,0,0), reuse, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, index_npc)
-						else
-							Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_NO_TARGET, myHero, Vector(0,0,0), reuse_2, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, index_npc)
+						if Menu.IsEnabled(courierReuse.optionNoFeed) then
+							Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_NO_TARGET, myHero, Vector(0,0,0), go_home, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, index_npc)
 						end
 					end
 				end
 			end
 		end
-	end
 end
 
 return courierReuse
